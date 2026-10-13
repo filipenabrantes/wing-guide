@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>WING no culto: guia de efeitos, inserts e dicas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,6 +92,33 @@ details.ctl{margin-top:16px;border:1px solid var(--line);border-radius:8px;paddi
 details.ctl>summary{cursor:pointer;font-family:var(--fd);font-size:21px;font-weight:600;padding:10px 0}
 details.ctl dl{padding-bottom:10px}
 .dh{border-top:10px solid var(--ac)}
+
+
+.fbtn,.fdone,.count2{display:none}
+@media (max-width:760px){
+  .filters{padding:8px 0}
+  .search{flex-wrap:nowrap;gap:8px}
+  .search input{flex:1 1 auto;min-width:0;font-size:16px;padding:10px 12px}
+  .search>.count{display:none}
+  .fbtn{display:inline-block;flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font-weight:600;font-family:var(--fd);font-size:19px}
+  .fbtn[aria-expanded="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  #fpanel{display:none;max-height:55vh;overflow-y:auto;padding-top:2px}
+  .filters.open #fpanel{display:block}
+  .count2{display:block;color:var(--mute);font-size:14.5px;margin-top:8px}
+  .fdone{display:block;width:100%;margin:14px 0 4px;padding:12px;border:0;border-radius:10px;background:var(--ui);color:var(--ui-ink);font-weight:600;font-size:17px}
+  .grid{margin-top:12px}
+  .wrap{padding:0 14px}
+  nav.tabs button{padding:10px 12px;font-size:19px}
+}
+@media (max-width:640px){
+  dialog{width:97vw;max-height:94vh}
+  .db{max-height:calc(94vh - 120px);padding:4px 14px 18px}
+  .dh{padding:14px}
+  .dh h2{font-size:28px}
+  .dh{flex-wrap:nowrap;align-items:flex-start}
+  .dh .x{flex:none;margin-left:0}
+  .dh>div{flex:1 1 0;min-width:0}
+}
 
 /* dialog */
 dialog{border:0;border-radius:14px;padding:0;width:min(720px,94vw);max-height:90vh;background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.45)}
@@ -216,12 +244,17 @@ footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--mute);fo
   <div class="filters">
     <div class="search">
       <input id="q" type="search" placeholder="Buscar efeito, equipamento original ou uso (ex.: caixa, plate, 1176, chiado)" aria-label="Buscar efeitos" autocomplete="off">
+      <button type="button" class="fbtn" id="fbtn" aria-expanded="false" aria-controls="fpanel">Filtros</button>
       <span class="count" id="count" aria-live="polite"></span>
     </div>
-    <div class="rowlabel">Tipo</div>
-    <div class="chips" id="catchips"></div>
-    <div class="rowlabel">Onde carregar</div>
-    <div class="chips" id="wherechips"></div>
+    <div id="fpanel">
+      <div class="count2" id="count2"></div>
+      <div class="rowlabel">Tipo</div>
+      <div class="chips" id="catchips"></div>
+      <div class="rowlabel">Onde carregar</div>
+      <div class="chips" id="wherechips"></div>
+      <button type="button" class="fdone" id="fdone">Ver resultados</button>
+    </div>
   </div>
   <div class="grid" id="grid"></div>
   <p class="note">As imagens e as descrições vêm do Effects Guide oficial da Behringer (firmware 3.0), traduzido e resumido. As sugestões para igreja são minhas. Itens marcados como “comunidade” ou “provável” não constam no guia. Os seis reverbs inspirados na Lexicon 480L mostram a mesma tela (a do Hall).</p>
@@ -584,7 +617,11 @@ function render(){
     return true;
   });
   var g=document.getElementById('grid');g.innerHTML='';
-  document.getElementById('count').textContent=list.length+' de '+ITEMS.length+' itens';
+  var ct=list.length+' de '+ITEMS.length+' itens';
+  document.getElementById('count').textContent=ct;document.getElementById('count2').textContent=ct;
+  var na=(st.cat!=='all'?1:0)+(st.wh!=='all'?1:0)+(st.star?1:0);
+  document.getElementById('fbtn').textContent=na?'Filtros ('+na+')':'Filtros';
+  document.getElementById('fdone').textContent='Ver resultados ('+list.length+')';
   if(!list.length){
     g.innerHTML='<div class="empty"><p>Nenhum efeito encontrado com esses filtros.</p></div>';
     var b=document.createElement('button');b.textContent='Limpar filtros';b.type='button';
@@ -618,6 +655,9 @@ function openDlg(it){
   document.getElementById('dx').onclick=function(){dlg.close();};
 }
 dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.close();});
+var fl=document.querySelector('.filters'),fb=document.getElementById('fbtn');
+fb.addEventListener('click',function(){var o=fl.classList.toggle('open');fb.setAttribute('aria-expanded',o?'true':'false');});
+document.getElementById('fdone').addEventListener('click',function(){fl.classList.remove('open');fb.setAttribute('aria-expanded','false');window.scrollTo({top:0});});
 document.getElementById('q').addEventListener('input',function(e){st.q=e.target.value;render();});
 document.addEventListener('keydown',function(e){
   if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&!dlg.open){e.preventDefault();document.getElementById('tabsfx')&&0;showTab('fx');document.getElementById('q').focus();}
